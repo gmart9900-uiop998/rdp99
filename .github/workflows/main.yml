@@ -175,12 +175,22 @@ jobs:
           # Set Tailscale path
           $tailscale = "$env:ProgramFiles\Tailscale\tailscale.exe"
           
-          # Authenticate and connect
+          # Authenticate and connect - FIXED: Using array of arguments to avoid parser error
           Write-Host "Authenticating with Tailscale..."
-          & $tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} `
-                          --hostname=gh-runner-$env:GITHUB_RUN_ID `
-                          --accept-routes `
-                          --accept-dns=false
+          $authKey = "${{ secrets.TAILSCALE_AUTH_KEY }}"
+          $hostname = "gh-runner-$env:GITHUB_RUN_ID"
+          
+          # Build arguments as an array
+          $arguments = @(
+              "up",
+              "--authkey=$authKey",
+              "--hostname=$hostname",
+              "--accept-routes",
+              "--accept-dns=false"
+          )
+          
+          # Execute with arguments
+          & $tailscale $arguments
           
           # Wait for IP assignment
           Write-Host "Waiting for Tailscale IP assignment..."
